@@ -25,25 +25,31 @@ placeholder_device_type = "PLACEHOLDERDEVICETYPE"
 placeholder_device_name = "PLACEHOLDERDEVICENAME"
 placeholder_device_loc = "PLACEHOLDERLOCATION"
 
-# Read the 'pumps_template' Excel file
-template_df = pd.read_excel('p.xlsx', sheet_name='Sheet1', header=None)
-template_df.columns = ["BLOCK TYPE", "TAG", "DESCRIPTION"]
 
 # Create an empty list to store the updated rows
 updated_rows = []
-
+failed = []
 for result_index, result_row in result_df.iterrows():
-    # Iterate over rows in the 'pumps_template' DataFrame
-    for index, row in template_df.iterrows():
-        # Replace placeholders with device type and device name
-        updated_row = row.apply(lambda cell: cell.replace(placeholder_device_type, result_row['Device_Type']))
-        updated_row = updated_row.apply(lambda cell: cell.replace(placeholder_device_loc, result_row['location']))
-        updated_row = updated_row.apply(lambda cell: cell.replace(placeholder_device_name, result_row['Device_Name']))
+    try:
 
-        updated_rows.append(updated_row)
+        template_df = pd.read_excel(f'templates/{result_row["Device_Type"]}.xlsx', sheet_name='Sheet1', header=None)
+        template_df.columns = ["BLOCK TYPE", "TAG", "DESCRIPTION"]
+        print(f"res_index = {result_index}, res_row = {result_row}")
+        # Iterate over rows in the 'pumps_template' DataFrame
+        for index, row in template_df.iterrows():
+            # Replace placeholders with device type and device name
+            updated_row = row.apply(lambda cell: cell.replace(placeholder_device_type, result_row['Device_Type']))
+            updated_row = updated_row.apply(lambda cell: cell.replace(placeholder_device_loc, result_row['location']))
+            updated_row = updated_row.apply(lambda cell: cell.replace(placeholder_device_name, result_row['Device_Name']))
 
+            updated_rows.append(updated_row)
+    except:
+        failed.append(result_row)
+
+failed_df = pd.DataFrame(failed)
+failed_df.to_excel('failed.xlsx', index=False)
 # Create a DataFrame from the updated rows
-final_df = pd.DataFrame(updated_rows, columns=template_df.columns)
+final_df = pd.DataFrame(updated_rows, columns=["BLOCK TYPE", "TAG", "DESCRIPTION"])
 
 # Save the result to a new Excel file
 final_df.to_excel('output2.xlsx', index=False)
