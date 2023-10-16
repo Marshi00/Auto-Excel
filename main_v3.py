@@ -45,8 +45,10 @@ def replace_placeholders(template_file, result_row, updated_rows, placeholders, 
         print(f"Template file not found: {template_file}")
         failed.append(result_row)
 
+
 def main():
     input_file = 'Auto Template.xlsx'
+    staging_file = 'EQ_List.xlsx'
     output_file = 'rdy_device2.xlsx'
     placeholder_device_type = "PLACEHOLDERDEVICETYPE"
     placeholder_device_name = "PLACEHOLDERDEVICENAME"
@@ -59,10 +61,10 @@ def main():
     }
 
     # Process data and save to 'rdy_device2.xlsx'
-    process_data(input_file, output_file)
+    process_data(input_file, staging_file)
 
     # Iterate over the result_df and replace placeholders in templates
-    result_df = pd.read_excel(output_file)
+    result_df = pd.read_excel(staging_file)
     failed = []
     updated_rows = []
     for result_index, result_row in result_df.iterrows():
@@ -79,6 +81,7 @@ def main():
 
     # Save the result to a new Excel file
     final_df.to_excel(output_file, index=False)
+
 
 if __name__ == "__main__":
     main()
